@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import nltk
 from collections import Counter
+import random
 
 def removeNonAplhabet(inputlist):
     # removes non alphabetical words in a list
@@ -18,22 +19,6 @@ def removeDuplicatesList(inputlist):
  
     
 
-def getLowestRankedWord(token_list, items_dict):
-    # return the word in the list "token_list" that corresponds the lowest ranked word
-    # in the dictionary "items_dict". We are doing this to simplify the category column
-    # and make more unique words higher priorety in the category simplifcation process
-    word = ''
-    smallest_word = float('inf')
-
-
-    for i in token_list:
-        if (items_dict[i] < smallest_word):
-            word = i
-            smallest_word = items_dict[i]
-
-
-    return word
-
 def main():
     # The main function
     episodes_df = pd.read_csv('data/episodes.csv')
@@ -43,6 +28,9 @@ def main():
     df = episodes_df.join(podcasts_df.set_index('uuid'), how='inner', on='podcast_uuid', lsuffix='_left', rsuffix='_right')
     # drop columns we do not care about
     df = df.drop(['pub_date', 'image', 'website', 'itunes_id'], axis=1)
+
+    # drop rows where the language is not English
+    df.drop(df.loc[df['language']!='English'].index, inplace=True)
 
     # delete later on just for better runtime
     # df = df.head(1000)
@@ -70,6 +58,8 @@ def main():
     items = {}
     print(df['categories'].head(100))
     df["categories"] = df["categories"].map(lambda x: x.lower()).copy()
+
+
     for i in range(df.shape[0]):
         tokens.append(nltk.word_tokenize(df['categories'].iloc[i]))
         tokens[i] = removeNonAplhabet(tokens[i])
@@ -97,10 +87,13 @@ def main():
         for i, value in enumerate(token):
             if value in items:
                 holder_token.append(value)
-        if not holder_token:
+        # only keep the feature vector if it has 1 categorical variable after ignoring repetitive words. This reduces the number of rows
+        # and will make sure there is no ambigious categories
+        if len(holder_token) != 1:
             tokens[index] = np.nan
         else:
-            tokens[index] = getLowestRankedWord(holder_token, items)
+            tokens[index] = holder_token[0]
+        
         
     
 
@@ -108,19 +101,36 @@ def main():
     df['categories'] = tokens
     # get each unique category
     category_labels = df['categories'].value_counts()
+    print('---Length of "Category" Column---')
     print(len(category_labels))
+    print('---Categories of "Category" Column---')
     print(category_labels)
 
     # drop NaN in categories. Created because some features vectors don't have a category in our 13 categories chosen
     print(df.isna().sum())
     df = df.dropna(subset=['categories'])
 
+    # get names of indexes for which 
+    # column 'categories' has each value and drop these rows until there's 10,000 samples of each category 
+    for index, value in enumerate(category_labels.index):
+        index_names = (df[ df['categories'] == value ].index).values
+        
+        index_to_drop = random.sample(list(index_names), (index_names.shape[0] - 10000))
+        
+        # drop these row indexes 
+        # from dataFrame 
+        df.drop(index_to_drop, inplace = True) 
+
     # reset index
     df = df.copy().reset_index(drop=True)
 
+    # get each unique category
+    category_labels = df['categories'].value_counts()
+    print('---Length of "Category" Column---')
+    print(len(category_labels))
+    print('---Categories of "Category" Column---')
+    print(category_labels)
 
-
-    
 
 
     
