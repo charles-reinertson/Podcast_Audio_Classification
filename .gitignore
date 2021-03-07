@@ -1,0 +1,6 @@
+.idea
+__pycache__
+model
+data
+.DS_STORE
+venv
