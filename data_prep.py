@@ -16,36 +16,40 @@ def removeDuplicatesList(inputlist):
     res = []
     [res.append(x) for x in inputlist if x not in res]
     return res
- 
-    
 
-def main():
-    # The main function
+def feature_engineering():
+    # performs feature engineering on data/episodes.csv and data/podcasts.csv
+    # returns train, test, and validate in pandas dataframe form. These dataframes have 4 columns
+    # including audio, audio_length, uuid, and categories. There is 66,000 rows of data in train,
+    # and 22,000 rows in test and validate. There is 11 unique column categories each with 10,000
+    # corresponding feature vectors among these 110,000 total rows of data
     episodes_df = pd.read_csv('data/episodes.csv')
     podcasts_df = pd.read_csv('data/podcasts.csv')
 
     # join dataframes on unique column 'uuid' for podcasts and 'podcast_uuid' for episodes
     df = episodes_df.join(podcasts_df.set_index('uuid'), how='inner', on='podcast_uuid', lsuffix='_left', rsuffix='_right')
-    # drop columns we do not care about
-    df = df.drop(['pub_date', 'image', 'website', 'itunes_id'], axis=1)
 
     # drop rows where the language is not English
     df.drop(df.loc[df['language']!='English'].index, inplace=True)
 
+    # drop columns we do not care about
+    df = df.drop(['pub_date', 'image', 'website', 'itunes_id', 'title_left', 'title_right', 'description_left', 'description_right', 'podcast_uuid', 'language', 'author'], axis=1)
+
     # delete later on just for better runtime
     # df = df.head(1000)
+
+    print("---Count Missing Values Per Feature---")
+    print(df.isna().sum())
+
+    # drop rows with missing title
+    # drop rows with missing audio
+    df = df.dropna(subset=['audio'])
     
 
     print("----Dataframe Random Feature Vectors----")
     print(df.sample(3).T)
    
     
-    print("---Count Missing Values Per Feature---")
-    print(df.isna().sum())
-
-    # drop rows with missing title
-    # drop rows with missing audio
-    df = df.dropna(subset=['title_left', 'title_right', 'audio'])
 
     # get each unique category
     category_labels = df['categories'].value_counts()
@@ -130,6 +134,29 @@ def main():
     print(len(category_labels))
     print('---Categories of "Category" Column---')
     print(category_labels)
+
+
+
+    # Split into test, train, and validate
+    train, test, validate = np.split(df.sample(frac=1, random_state=42), [int(0.6*len(df)), int(0.8*len(df))])
+
+    print("\n--------Train Dataframe Info--------")
+    print(train.info())
+    print("\n--------Test Dataframe Info--------")
+    print(test.info())
+    print("\n--------Validate Dataframe Info--------")
+    print(validate.info())
+
+    return train, test, validate
+ 
+    
+
+def main():
+    # The main function
+    train, test, validate = feature_engineering()
+
+    done = True
+
 
 
 
