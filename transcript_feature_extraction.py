@@ -5,6 +5,8 @@ from nrclex import NRCLex
 import string
 
 
+# CITATION: Some of these function are taken from my own (Charles Reinertson) EECS 445 Project 1. 
+
 def getFeatures(data, features):
     """
     Create a numpy array with shape (num_samples, num_features) for input data. Each row contains
