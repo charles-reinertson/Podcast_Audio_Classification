@@ -7,7 +7,7 @@ import string
 
 # CITATION: Some of these function are taken from my own (Charles Reinertson) EECS 445 Project 1. 
 
-def getFeatures(data, features):
+def getFeatures(series, features):
     """
     Create a numpy array with shape (num_samples, num_features) for input data. Each row contains
     the number of the percentage of each feature based off the total number of tokens in the word.
@@ -17,13 +17,13 @@ def getFeatures(data, features):
     Returns:
         a feature matrix of dimension (# of reviews, # of features)
     """
-    data["text"] = data["text"].map(lambda x: x.lower()).copy()
-    dataframe = np.zeros((data.shape[0], len(features)))
-    emotion_text_column = data["text"].map(lambda x: NRCLex(x)).copy()# NRCLex(data["text"])
+    series = series.map(lambda x: x.lower()).copy()
+    dataframe = np.zeros((series.shape[0], len(features)))
+    emotion_text_column = series.map(lambda x: NRCLex(x)).copy()# NRCLex(data)
     
    
     for i in range(dataframe.shape[0]):
-        tokens = nltk.word_tokenize(data['text'].iloc[i])
+        tokens = nltk.word_tokenize(series.iloc[i])
         parts_of_speach = nltk.pos_tag(tokens)
         
         key = list(emotion_text_column[i].raw_emotion_scores.keys())
@@ -34,15 +34,13 @@ def getFeatures(data, features):
         for j, value in enumerate(parts_of_speach):
             if value[1] in features.keys():
                 dataframe[i, features[value[1]]] += 1
-                
-        
+
         dataframe[i] = dataframe[i] / len(tokens)
         
-                 
-    
     return dataframe
 
-def extract_dictionary(df):
+
+def extract_dictionary(transcript_series):
     """
     Reads a pandas dataframe, and returns a dictionary of distinct words
     mapping from each distinct word to its index (ordered by when it was found).
@@ -54,7 +52,7 @@ def extract_dictionary(df):
         iterating over all words in each review in the dataframe df
     """
     word_dict = {}
-    text = df["text"].map(lambda x: x.lower()).copy()
+    text = transcript_series.map(lambda x: x.lower()).copy()
     k = 0
     
     for i in text:
@@ -68,7 +66,7 @@ def extract_dictionary(df):
     return word_dict
 
 
-def generate_feature_matrix(df, word_dict):
+def generate_feature_matrix(series, word_dict):
     """
     Reads a dataframe and the dictionary of unique words
     to generate a bag of words count for each review.
@@ -81,12 +79,12 @@ def generate_feature_matrix(df, word_dict):
     Returns:
         a feature matrix of dimension (# of reviews, # of words in dictionary)
     """
-    number_of_reviews = df.shape[0]
+    number_of_reviews = series.shape[0]
     number_of_words = len(word_dict)
     feature_matrix = np.zeros((number_of_reviews, number_of_words))
     # TODO: Implement this function
     # get the text in a vector
-    text = df["text"].map(lambda x: x.lower()).copy()
+    text = series.map(lambda x: x.lower()).copy()
 
     k = 0
     for i in text:
@@ -101,39 +99,27 @@ def generate_feature_matrix(df, word_dict):
     return feature_matrix
 
 
+def process_transcripts(data):
+    features = {'anger': 0, 'anticipation': 1, 'disgust': 2, 'fear': 3, 'joy': 4, 'sadness': 5,
+                'surprise': 6, 'trust': 7, 'negative': 8, 'positive': 9, 'CC': 10, 'IN': 11, 'JJR': 12,
+                'JJS': 13, 'PRP': 14}
 
+    # getting the feature representation of each transcript in the above format
+    transcript_features1 = getFeatures(data, features)
 
+    # bag of words
+    word_dict = extract_dictionary(data)
+    transcript_features2 = generate_feature_matrix(data, word_dict)
 
-
-
-
-
-
+    # combine bag of words and emotional feature representation. We can do this becuase both are normalized
+    return np.hstack((transcript_features1, transcript_features2))
 
 
 def main():
     amazon = pd.read_csv('sentiment labelled sentences/amazon_cells_labelled.txt', delimiter = "\t", quoting=3, header=None)
     amazon.columns = ['text', 'label']
 
-
-    features = {'anger': 0, 'anticipation': 1, 'disgust': 2, 'fear': 3, 'joy': 4, 'sadness': 5,
-            'surprise': 6, 'trust': 7, 'negative': 8, 'positive': 9, 'CC': 10, 'IN': 11, 'JJR': 12,
-            'JJS': 13, 'PRP': 14}
-
-
-    # getting the feature representation of each transcript in the above format
-    transcript_features1 = getFeatures(amazon, features)
-
-    # bag of words
-    word_dict = extract_dictionary(amazon)
-    transcript_features2 = generate_feature_matrix(amazon, word_dict)
-
-
-    # combine bag of words and emotional feature representation. We can do this becuase both are normalized
-    transcript_features = np.hstack((transcript_features1, transcript_features2))
-
-
- 
+    process_transcripts(amazon.text)
 
 
 if __name__ == "__main__":

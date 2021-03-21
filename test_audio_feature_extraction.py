@@ -56,20 +56,7 @@ def test_opensmile():
 def visualize_features():
     df_episodes = pd.read_csv('data/episodes.csv')
     audio_processor = AudioProcessor()
-    audio_feature_data = []
-    for index, row in df_episodes[3:7].iterrows():
-        try:
-            features, transcript = audio_processor.process(row.audio,
-                                                           row.audio_length)
-            audio_feature_data.append(features)
-            for transcript_i in transcript:
-                print(transcript_i)
-        except subprocess.CalledProcessError:
-            logging.error('Failed to load url {}'.format(row.audio))
-
-    audio_feature_data = pd.DataFrame(audio_feature_data)
-    audio_feature_data.boxplot(rot=-45, showfliers=False, showbox=False)
-    plt.show()
+    audio_processor.process(df_episodes[['audio', 'audio_length']][3:7])
 
 
 def main():

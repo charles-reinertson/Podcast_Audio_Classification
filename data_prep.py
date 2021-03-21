@@ -4,6 +4,10 @@ import pandas as pd
 import nltk
 from collections import Counter
 import random
+from audio_feature_extraction import AudioProcessor
+from transcript_feature_extraction import process_transcripts
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def removeNonAplhabet(inputlist):
     # removes non alphabetical words in a list
@@ -148,21 +152,39 @@ def feature_engineering():
     print(validate.info())
 
     return train, test, validate
- 
-    
 
-def main():
+
+def main(datasets):
     # The main function
-    train, test, validate = feature_engineering()
+    audio_processor = AudioProcessor()
+    print('############ Post Audio Feature Extraction ############')
 
-    done = True
+    for name, df in tqdm(zip(['train', 'test', 'validate'], datasets)):
+        audio_features, transcripts, processed_indecies = audio_processor.process(df[['audio', 'audio_length']])
+        df = df.iloc[processed_indecies]
+        print("\n--------{} Dataframe Info--------".format(name))
+        print(df.info())
+        category_labels = df.categories.value_counts()
+        print('---Length of "Category" Column---')
+        print(len(category_labels))
+        print('---Categories of "Category" Column---')
+        print(category_labels)
+        transcripts = process_transcripts(transcripts)
+        final_features = np.hstack([audio_features.to_numpy(), transcripts])
+        np.save('{}_features'.format(name), final_features)
 
-
-
-
-    
-    
+        if name == 'train':
+            audio_features['categories'] = df.categories
+            audio_features.boxplot(rot=-45, showfliers=False, showbox=False,
+                                   by='categories')
+            plt.savefig('audio_features_by_categories_visualization.png')
 
 
 if __name__ == "__main__":
-    main()
+    """datasets = feature_engineering()  # train, test, validate
+    for name, df in zip(['train', 'test', 'validate'], datasets):
+        df.to_csv(path_or_buf='{}.csv'.format(name))"""
+    datasets = []
+    for name in ['train', 'test', 'validate']:
+        datasets.append(pd.read_csv(name + '.csv'))
+    main(datasets)
