@@ -27,17 +27,17 @@ def extract_features():
         audio_features, transcripts, categories, failed_indices = \
             processor.process(df[['audio', 'audio_length', 'categories']][start_index:stop_index])
 
-        np.save('{}/{}_{}_audio_features.npy'.format(ROOT_DIR, partition, batch_num),
+        np.save('{}/data/{}_{}_audio_features.npy'.format(ROOT_DIR, partition, batch_num),
                 audio_features)
         # the highest pickle protocol that Colab supports is 4
         colab_pickle_protocol = 4
-        with open('{}/{}_{}_transcripts.pkl'.format(ROOT_DIR, partition, batch_num),
+        with open('{}/data/{}_{}_transcripts.pkl'.format(ROOT_DIR, partition, batch_num),
                   mode='wb') as file:
             pickle.dump(transcripts, file, protocol=colab_pickle_protocol)
-        with open('{}/{}_{}_labels.pkl'.format(ROOT_DIR, partition, batch_num),
+        with open('{}/data/{}_{}_labels.pkl'.format(ROOT_DIR, partition, batch_num),
                   mode='wb') as file:
             pickle.dump(categories, file, protocol=colab_pickle_protocol)
-        with open('{}/{}_{}_failed.pkl'.format(ROOT_DIR, partition, batch_num),
+        with open('{}/data/{}_{}_failed.pkl'.format(ROOT_DIR, partition, batch_num),
                   mode='wb') as file:
             pickle.dump(failed_indices, file, protocol=colab_pickle_protocol)
 
