@@ -1,13 +1,9 @@
-import logging
 import opensmile
-import audiofile
 import pandas as pd
 import subprocess
 import json
-import numpy as np
-import matplotlib.pyplot as plt
-from vosk import Model, KaldiRecognizer, SetLogLevel
-from audio_feature_extraction import AudioProcessor
+from vosk import Model, KaldiRecognizer
+from vosk_audio_processor import VoskAudioProcessor
 
 
 def test_vosk(url):
@@ -53,9 +49,9 @@ def test_opensmile():
     print(df)
 
 
-def visualize_features():
+def run_processor():
     df_episodes = pd.read_csv('data/episodes.csv')
-    audio_processor = AudioProcessor()
+    audio_processor = VoskAudioProcessor()
     audio_processor.process(df_episodes[['audio', 'audio_length']][3:7])
 
 
@@ -63,7 +59,7 @@ def main():
     """MAIN FUNCTION"""
     # test_opensmile()
     # test_vosk('http://95bfm.com/sites/default/files/291117_Dear_Science.mp3')
-    visualize_features()
+    run_processor()
 
 
 if __name__ == '__main__':
