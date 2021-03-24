@@ -3,7 +3,6 @@ import subprocess
 import deepspeech
 import soundfile
 import io
-import logging
 import pandas as pd
 import numpy as np
 from tqdm import tqdm
@@ -33,18 +32,19 @@ class AudioProcessor:
         :return: features, transcripts, indices - an (n x k) dataframe, an n-length pandas series,
         an n-length list of the indices that were successfully processed
         """
-        features, transcripts, categories = [], [], []
-        for _, (url, duration, category) in tqdm(url_duration_category_df.iterrows(),
-                                                 total=len(url_duration_category_df)):
-            starts = get_random_start_times(duration, sample_length)
-            if starts is None:
-                logging.error('url {} is only {}s -- too short to analyze'.format(url, duration))
+        features, transcripts, categories, failed_indices = [], [], [], []
+        for index, (url, duration, category) in tqdm(url_duration_category_df.iterrows(),
+                                                     total=len(url_duration_category_df),
+                                                     desc='AudioProcessor'):
+            if duration < sample_length:
+                failed_indices.append(index)
                 continue
 
+            starts = get_random_start_times(duration, sample_length)
             samples = get_audio_samples(url, self.model.sampleRate(), starts,
                                         sample_length)
             if samples is None:
-                logging.error('Failed to load url {}'.format(url))
+                failed_indices.append(index)
                 continue
 
             samples_features = self.extract_audio_features(samples)
@@ -53,7 +53,7 @@ class AudioProcessor:
             transcripts.append(samples_transcript)
             categories.append(category)
 
-        return np.vstack(features), transcripts, categories
+        return np.vstack(features), transcripts, categories, failed_indices
 
     def transcribe(self, audio_signals):
         """
@@ -84,8 +84,6 @@ class AudioProcessor:
 
 def get_random_start_times(audio_length, sample_length):
     max_start_time = audio_length - sample_length
-    if max_start_time < 0:
-        return None
     rng = np.random.default_rng()
     starts = np.sort(rng.integers(max_start_time, size=2, endpoint=True))
     starts = separate_pair_by_interval(starts, max_start_time, sample_length)
