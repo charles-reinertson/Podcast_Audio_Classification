@@ -25,7 +25,7 @@ def extract_features():
     while start_index < df.shape[0]:
         stop_index = min(start_index + batch_size, df.shape[0])
         audio_features, transcripts, categories, failed_indices = \
-            processor.process(df[['audio', 'audio_length', 'category']][start_index:stop_index])
+            processor.process(df[['audio', 'audio_length', 'categories']][start_index:stop_index])
 
         np.save('{}/{}_{}_audio_features.npy'.format(ROOT_DIR, partition, batch_num),
                 audio_features)
