@@ -5,7 +5,7 @@
 ###############################################################
 
 Usage:
-    !python audio_feature_extraction.py [dataset partition] [starting index] [starting batch number]
+    !python audio_feature_extraction.py [dataset partition]
 """
 import sys
 import pandas as pd
@@ -18,9 +18,12 @@ ROOT_DIR = '/content/drive/MyDrive/Podcast_Audio_Classification'
 
 
 def extract_features():
-    partition, start_index, batch_num = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+    partition = sys.argv[1]
+    startup_filename = '{}/data/{}_startup.pkl'.format(ROOT_DIR, partition)
+    with open(startup_filename, mode='rb') as file:
+        start_index, batch_num = pickle.load(file)
     df = pd.read_csv('{}/{}.csv'.format(ROOT_DIR, partition))
-    batch_size = 1000
+    batch_size = 100
     processor = AudioProcessor()
     while start_index < df.shape[0]:
         stop_index = min(start_index + batch_size, df.shape[0])
@@ -41,11 +44,10 @@ def extract_features():
                   mode='wb') as file:
             pickle.dump(failed_indices, file, protocol=colab_pickle_protocol)
 
-        print('Stop index (excluded): {}'.format(stop_index))
-        print('Num examples failed processing: {}'.format(len(failed_indices)))
-
         start_index = stop_index
         batch_num += 1
+        with open(startup_filename, mode='wb') as file:
+            pickle.dump([stop_index, batch_num], file, protocol=colab_pickle_protocol)
 
 
 if __name__ == '__main__':
