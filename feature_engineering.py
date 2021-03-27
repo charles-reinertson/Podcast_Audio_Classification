@@ -4,7 +4,8 @@ import pandas as pd
 import glob
 import argparse
 from transcript_feature_extraction import *
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import StandardScaler
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -162,10 +163,11 @@ def feature_engineer(args):
     test_labels = test.label
     validate_labels = validate.label
 
-    # One hot encode labels
-    train_labels = LabelBinarizer().fit_transform(train_labels)
-    test_labels = LabelBinarizer().fit_transform(test_labels)
-    validate_labels = LabelBinarizer().fit_transform(validate_labels)
+    # Change categories to be numerical
+    train_labels = pd.factorize(train_labels, sort=True)[0]
+    test_labels = pd.factorize(test_labels, sort=True)[0]
+    validate_labels = pd.factorize(validate_labels, sort=True)[0]
+
 
     # drop labels from main dataframe
     train = train.drop(columns=['label'])
@@ -179,19 +181,25 @@ def feature_engineer(args):
     test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features)], axis=1)
     validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features)], axis=1)
 
+    # fill nan values with zero
+    train_transcript_features = train_transcript_features.fillna(0)
+    test_transcript_features = test_transcript_features.fillna(0)
+    validate_transcript_features = validate_transcript_features.fillna(0)
+    
+
     # convert features to numpy from pandas
     train_transcript_features = train_transcript_features.to_numpy()
     test_transcript_features = test_transcript_features.to_numpy()
     validate_transcript_features = validate_transcript_features.to_numpy()
 
     # create a final train, test, validate dataframe with all features correct and ready to be modeled
-    train = pd.DataFrame({'categories': list(train_labels), 'transcript_features': list(train_transcript_features)}, columns=['categories', 'transcript_features'])
+    train = pd.DataFrame({'categories': train_labels, 'transcript_features': list(train_transcript_features)}, columns=['categories', 'transcript_features'])
     print(train.head())
 
-    test = pd.DataFrame({'categories': list(test_labels), 'transcript_features': list(test_transcript_features)}, columns=['categories', 'transcript_features'])
+    test = pd.DataFrame({'categories': test_labels, 'transcript_features': list(test_transcript_features)}, columns=['categories', 'transcript_features'])
     print(test.head())
 
-    validate = pd.DataFrame({'categories': list(validate_labels), 'transcript_features': list(validate_transcript_features)}, columns=['categories', 'transcript_features'])
+    validate = pd.DataFrame({'categories': validate_labels, 'transcript_features': list(validate_transcript_features)}, columns=['categories', 'transcript_features'])
     print(validate.head())
   
 
