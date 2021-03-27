@@ -99,7 +99,11 @@ def generate_feature_matrix(series, word_dict):
     return feature_matrix
 
 
-def process_transcripts(data):
+def process_transcripts(data, combined_data):
+    '''
+    data: either a train, test, or validate dataframe
+    combined_data: a combination of train, test and validate
+    '''
     features = {'anger': 0, 'anticipation': 1, 'disgust': 2, 'fear': 3, 'joy': 4, 'sadness': 5,
                 'surprise': 6, 'trust': 7, 'negative': 8, 'positive': 9, 'CC': 10, 'IN': 11, 'JJR': 12,
                 'JJS': 13, 'PRP': 14}
@@ -108,7 +112,7 @@ def process_transcripts(data):
     transcript_features1 = getFeatures(data, features)
 
     # bag of words
-    word_dict = extract_dictionary(data)
+    word_dict = extract_dictionary(combined_data)
     transcript_features2 = generate_feature_matrix(data, word_dict)
 
     # combine bag of words and emotional feature representation. We can do this becuase both are normalized
@@ -119,8 +123,11 @@ def main():
     amazon = pd.read_csv('sentiment labelled sentences/amazon_cells_labelled.txt', delimiter = "\t", quoting=3, header=None)
     amazon.columns = ['text', 'label']
 
-    process_transcripts(amazon.text)
+    process_transcripts(amazon.text, amazon.text)
 
 
 if __name__ == "__main__":
     main()
+
+
+
