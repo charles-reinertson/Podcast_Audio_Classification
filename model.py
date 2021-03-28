@@ -230,7 +230,7 @@ def main():
     # define model, loss function, and optimizer
     model = NNetwork()
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
     plt.ion()
     fig, axes = plt.subplots(1,2, figsize=(10,5))
@@ -261,7 +261,7 @@ def main():
     plt.ioff()
     plt.show()
 
-    bob = 1
+
 
 
 
