@@ -4,7 +4,6 @@ import pandas as pd
 import glob
 import argparse
 from transcript_feature_extraction import *
-from sklearn.preprocessing import StandardScaler
 
 
 parser = argparse.ArgumentParser()
@@ -139,6 +138,27 @@ def get_train_test_validat(data_location, test_num_batches, train1_num_batches, 
 
     return train, test, validate
 
+
+def z_score(df_test, df_train, df_validate):
+    '''
+    Normalize the dataframe by computing the z-score. Return the normalized dataframes
+    test, train, and validate in that order
+    '''
+    # copy the dataframe
+    df_copy_test = df_test.copy()
+    df_copy_train = df_train.copy()
+    df_copy_validate = df_validate.copy()
+
+    # stack train, test, and validate on top one another 
+    df = pd.concat([df_copy_test, df_copy_train, df_copy_validate])
+    # apply the z-score method
+    for column in df_copy_test.columns:
+        df_copy_test[column] = (df_copy_test[column] - df[column].mean()) / df[column].std()
+        df_copy_train[column] = (df_copy_train[column] - df[column].mean()) / df[column].std()
+        df_copy_validate[column] = (df_copy_validate[column] - df[column].mean()) / df[column].std()
+        
+    return df_copy_test, df_copy_train, df_copy_validate
+
 def feature_engineer(args):
     
     # N rows, 90 columns with 88 of those columns being audio features (0-88 )and the last two columns being 'text' and label'
@@ -174,7 +194,13 @@ def feature_engineer(args):
     test = test.drop(columns=['label'])
     validate = validate.drop(columns=['label'])
 
+    # fill nan values with zero
+    train = train.fillna(0)
+    test = test.fillna(0)
+    validate = validate.fillna(0)
     # TODO: Normalize features in train, test, and validate (normalize speech features)
+    test, train, validate = z_score(test, train, validate)
+
 
     # combine transcript feauters and speech features
     train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features)], axis=1)
@@ -185,6 +211,7 @@ def feature_engineer(args):
     train_transcript_features = train_transcript_features.fillna(0)
     test_transcript_features = test_transcript_features.fillna(0)
     validate_transcript_features = validate_transcript_features.fillna(0)
+
     
 
     # convert features to numpy from pandas
