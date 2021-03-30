@@ -20,22 +20,22 @@ class AudioProcessor:
     def __int__(self):
         self.model.enableExternalScorer('deepspeech/model.scorer')
 
-    def process(self, url_duration_category_df, sample_length=30):
+    def process(self, df, sample_length=30):
         """
         Extract features from each url by downloading and sampling two
         (sample_length) seconds samples of the file and transcribing them;
         the audio features of the two samples are combined by averaging them
 
-        :param url_duration_category_df: a dataframe that specifies the location and duration
+        :param df: a dataframe that specifies the location and duration
         of the audio file
         :param sample_length: the length of the audio samples used to extract features
         :return: features, transcripts, indices - an (n x k) dataframe, an n-length pandas series,
         an n-length list of the indices that were successfully processed
         """
-        features, transcripts, categories, failed_indices = [], [], [], []
-        for index, (url, duration, category) in tqdm(url_duration_category_df.iterrows(),
-                                                     total=len(url_duration_category_df),
-                                                     desc='AudioProcessor'):
+        features, transcripts, titles, categories, failed_indices = ([],) * 5
+        for index, (url, duration, title, category) in tqdm(df.iterrows(),
+                                                            total=len(df),
+                                                            desc='AudioProcessor'):
             if duration < sample_length:
                 failed_indices.append(index)
                 continue
@@ -51,11 +51,12 @@ class AudioProcessor:
             samples_transcript = self.transcribe(samples)
             features.append(samples_features)
             transcripts.append(samples_transcript)
+            titles.append(title)
             categories.append(category)
 
         if len(features) == 0:
             return [None] * 4
-        return np.vstack(features), transcripts, categories, failed_indices
+        return np.vstack(features), transcripts, titles, categories, failed_indices
 
     def transcribe(self, audio_signals):
         """

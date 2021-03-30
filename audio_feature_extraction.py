@@ -29,8 +29,11 @@ def extract_features():
     processor = AudioProcessor()
     while start_index < df.shape[0]:
         stop_index = min(start_index + batch_size, df.shape[0])
-        audio_features, transcripts, categories, failed_indices = \
-            processor.process(df[['audio', 'audio_length', 'categories']][start_index:stop_index])
+        audio_features, transcripts, titles, categories, failed_indices = \
+            processor.process(df[['audio',
+                                  'audio_length',
+                                  'title_right',
+                                  'categories']][start_index:stop_index])
         if audio_features is None:
             validated_df, end = drop_invalid_urls(df, start_index)
             df.to_csv(path_or_buf='{}/before_removing_[{}:{}]_{}.csv'.format(ROOT_DIR,
@@ -50,6 +53,9 @@ def extract_features():
             with open('{}/data/{}_{}_labels.pkl'.format(ROOT_DIR, partition, batch_num),
                       mode='wb') as file:
                 pickle.dump(categories, file, protocol=colab_pickle_protocol)
+            with open('{}/data/{}_{}_titles.pkl'.format(ROOT_DIR, partition, batch_num),
+                      mode='wb') as file:
+                pickle.dump(titles, file, protocol=colab_pickle_protocol)
             with open('{}/data/{}_{}_failed.pkl'.format(ROOT_DIR, partition, batch_num),
                       mode='wb') as file:
                 pickle.dump(failed_indices, file, protocol=colab_pickle_protocol)
