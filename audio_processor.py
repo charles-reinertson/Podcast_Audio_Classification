@@ -32,7 +32,7 @@ class AudioProcessor:
         :return: features, transcripts, indices - an (n x k) dataframe, an n-length pandas series,
         an n-length list of the indices that were successfully processed
         """
-        features, transcripts, titles, categories, failed_indices = ([],) * 5
+        features, transcripts, titles, categories, failed_indices = [], [], [], [], []
         for index, (url, duration, title, category) in tqdm(df.iterrows(),
                                                             total=len(df),
                                                             desc='AudioProcessor'):
