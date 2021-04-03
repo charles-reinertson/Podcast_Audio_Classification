@@ -55,7 +55,7 @@ class AudioProcessor:
             categories.append(category)
 
         if len(features) == 0:
-            return [None] * 4
+            return [None] * 5
         return np.vstack(features), transcripts, titles, categories, failed_indices
 
     def transcribe(self, audio_signals):
