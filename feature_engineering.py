@@ -10,27 +10,27 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--test_num_batches',
     type=int,
-    default=80,
+    default=114,
     help='The number of batches of test data')
 parser.add_argument(
     '--train1_num_batches',
     type=int,
-    default=101,
+    default=139,
     help='The number of batches of train 1 data')
 parser.add_argument(
     '--train2_num_batches',
     type=int,
-    default=102,
+    default=154,
     help='The number of batches of train 2 data')
 parser.add_argument(
     '--train3_num_batches',
     type=int,
-    default=95,
+    default=141,
     help='The number of batches of train 3 data')
 parser.add_argument(
     '--validate_num_batches',
     type=int,
-    default=75,
+    default=120,
     help='The number of batches of validate data')
 
 
@@ -167,8 +167,8 @@ def z_score(df_test, df_train, df_validate):
     df_copy_train = df_train.copy()
     df_copy_validate = df_validate.copy()
 
-    # stack train, test, and validate on top one another 
-    df = pd.concat([df_copy_test, df_copy_train, df_copy_validate])
+    # stack test, and validate on top one another to normalize with just test and validate
+    df = pd.concat([df_copy_train, df_copy_validate])
     # apply the z-score method
     for column in df_copy_test.columns:
         df_copy_test[column] = (df_copy_test[column] - df[column].mean()) / df[column].std()
@@ -234,14 +234,19 @@ def feature_engineer(args):
 
 
     # combine transcript feauters and speech features
-    train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features), pd.DataFrame(train_title_features)], axis=1)
-    test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features), pd.DataFrame(test_title_features)], axis=1)
-    validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features), pd.DataFrame(validate_title_features)], axis=1)
+    train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features)], axis=1)
+    test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features)], axis=1)
+    validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features)], axis=1)
+    
+    # combine transcript feauters and speech features and title features
+    # train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features), pd.DataFrame(train_title_features)], axis=1)
+    # test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features), pd.DataFrame(test_title_features)], axis=1)
+    # validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features), pd.DataFrame(validate_title_features)], axis=1)
 
     # DELETE
-#     train_transcript_features = pd.DataFrame(train_title_features)
-#     test_transcript_features = pd.DataFrame(test_title_features)
-#     validate_transcript_features = pd.DataFrame(validate_title_features)
+    # train_transcript_features = pd.DataFrame(train_title_features)
+    # test_transcript_features = pd.DataFrame(test_title_features)
+    # validate_transcript_features = pd.DataFrame(validate_title_features)
   
 
     # fill nan values with zero
@@ -249,6 +254,13 @@ def feature_engineer(args):
     test_transcript_features = test_transcript_features.fillna(0)
     validate_transcript_features = validate_transcript_features.fillna(0)
 
+    # get the shape of the transcript features
+    print("Train shape:")
+    print(train_transcript_features.shape)
+    print("Test shape:")
+    print(test_transcript_features.shape)
+    print("Validate shape:")
+    print(validate_transcript_features.shape)
     
 
     # convert features to numpy from pandas
