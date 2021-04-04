@@ -116,30 +116,26 @@ class NNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         # input: 54275 output: 10000
-        self.fc1 = nn.Linear(54275, 10000)
-        self.drop1 = nn.Dropout(0.3)
+        self.fc1 = nn.Linear(26196, 1000)
+        self.drop1 = nn.Dropout(0.4)
         # input: 10000 output: 1024
-        self.fc2 = nn.Linear(10000, 1024)
-        self.drop2 = nn.Dropout(0.3)
-        # input: 1024 output: 64
-        self.fc3 = nn.Linear(1024, 64)
-        self.drop3 = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(1000, 100)
+        self.drop2 = nn.Dropout(0.4)
         # input: 64 output: 11
-        self.fc4 = nn.Linear(64, 11)
+        self.fc3 = nn.Linear(100, 11)
         #
 
         self.init_weights()
 
     def init_weights(self):
         # initialize the parameters for [self.fc1, self.fc2, self.fc3, self.fc4]
-        for fc in [self.fc1, self.fc2, self.fc3, self.fc4]:
+        for fc in [self.fc1, self.fc2, self.fc3]:
             F_in = fc.weight.size(1)
             nn.init.normal_(fc.weight, 0.0, 1 / sqrt(F_in))
             nn.init.constant_(fc.bias, 0.0)
         
 
     def forward(self, x):
-        bob = x.float()
         x = self.fc1(x.float())
         x = self.drop1(x)
         x = F.silu(x)
@@ -147,9 +143,6 @@ class NNetwork(nn.Module):
         x = self.drop2(x)
         x = F.silu(x)
         x = self.fc3(x)
-        x = self.drop3(x)
-        x = F.silu(x)
-        x = self.fc4(x)
 
         return x
 
@@ -200,7 +193,7 @@ def main():
     # df = pd.concat([train, test])
     
 
-    max_epochs = 40
+    max_epochs = 30
     partition = {}
     labels = {}
     partition['train'] = train.index
@@ -230,7 +223,7 @@ def main():
     # define model, loss function, and optimizer
     model = NNetwork()
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     plt.ion()
     fig, axes = plt.subplots(1,2, figsize=(10,5))
