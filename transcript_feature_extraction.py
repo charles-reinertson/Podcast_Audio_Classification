@@ -3,6 +3,7 @@ import numpy as np
 import nltk
 from nrclex import NRCLex
 import string
+import enchant
 
 
 # CITATION: Some of these function are taken from my own (Charles Reinertson) EECS 445 Project 1. 
@@ -52,6 +53,8 @@ def extract_dictionary(transcript_series):
         iterating over all words in each review in the dataframe df
     """
     word_dict = {}
+    # check if the word is a english word or a bad trasncription
+    d = enchant.Dict("en_US")
     text = transcript_series.map(lambda x: x.lower()).copy()
     k = 0
     
@@ -60,7 +63,8 @@ def extract_dictionary(transcript_series):
             i = i.replace(j, ' ')
         words = i.split()
         for j in words:
-            if j not in word_dict:
+            # only put word in dictionary if transcription is correct and word not in dictionary already
+            if (j not in word_dict) and d.check(j):
                 word_dict[j] = k
                 k += 1
     return word_dict
