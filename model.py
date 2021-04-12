@@ -268,8 +268,11 @@ def main():
         test_loss = np.mean(running_loss)
         test_acc = correct / total
     
-    print("Test loss:", test_loss)
-    print("Test accuracy:", test_acc)
+    print("Test loss: {0}".format(test_loss))
+    print("Test accuracy: {0}".format(test_acc))
+    with open("test_emotion_features.txt", "w+") as text_file:
+        text_file.write("Test loss: {0}".format(test_loss))
+        text_file.write("Test accuracy: {0}".format(test_acc))
 
     # save stats as numpy array to csv file
     stats = np.array(stats)
