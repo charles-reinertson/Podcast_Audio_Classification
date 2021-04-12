@@ -271,7 +271,7 @@ def main():
     print("Test loss: {0}".format(test_loss))
     print("Test accuracy: {0}".format(test_acc))
     with open("test_emotion_features.txt", "w+") as text_file:
-        text_file.write("Test loss: {0}".format(test_loss))
+        text_file.write("Test loss: {0} \n".format(test_loss))
         text_file.write("Test accuracy: {0}".format(test_acc))
 
     # save stats as numpy array to csv file
