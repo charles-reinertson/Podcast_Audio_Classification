@@ -33,7 +33,7 @@ def _train_epoch(data_loader, model, criterion, optimizer):
         optimizer.step()
     #
 
-def _evaluate_epoch(axes, tr_loader, test_loader, model, criterion, epoch, stats):
+def _evaluate_epoch(axes, tr_loader, validate_loader, model, criterion, epoch, stats):
     with torch.no_grad():
         y_true, y_pred = [], []
         correct, total = 0, 0
@@ -52,7 +52,7 @@ def _evaluate_epoch(axes, tr_loader, test_loader, model, criterion, epoch, stats
         y_true, y_pred = [], []
         correct, total = 0, 0
         running_loss = []
-        for X, y in test_loader:
+        for X, y in validate_loader:
             output = model(X)
             predicted = torch.argmax(torch.nn.functional.softmax(output.data, dim=1), dim=1)
             y_true.append(y)
@@ -63,7 +63,7 @@ def _evaluate_epoch(axes, tr_loader, test_loader, model, criterion, epoch, stats
         val_loss = np.mean(running_loss)
         val_acc = correct / total
     
-    stats.append([val_acc, val_loss, train_acc, train_loss])
+    stats.append([val_acc, val_loss])
     print('Epoch {}'.format(epoch))
     print('\tValidation Loss: {}'.format(val_loss))
     print('\tValidation Accuracy: {}'.format(val_acc))
@@ -72,19 +72,38 @@ def _evaluate_epoch(axes, tr_loader, test_loader, model, criterion, epoch, stats
 
     valid_acc = [s[0] for s in stats]
     valid_loss = [s[1] for s in stats]
-    train_acc = [s[2] for s in stats]
-    train_loss = [s[3] for s in stats]
     axes[0].plot(range(epoch - len(stats) + 1, epoch + 1), valid_acc,
         linestyle='--', marker='o', color='b')
-    axes[0].plot(range(epoch - len(stats) + 1, epoch + 1), train_acc,
-        linestyle='--', marker='o', color='r')
-    axes[0].legend(['Validation', 'Train'])
+    axes[0].legend(['Validation'])
     axes[1].plot(range(epoch - len(stats) + 1, epoch + 1), valid_loss,
         linestyle='--', marker='o', color='b')
-    axes[1].plot(range(epoch - len(stats) + 1, epoch + 1), train_loss,
-        linestyle='--', marker='o', color='r')
-    axes[1].legend(['Validation', 'Train'])
+    axes[1].legend(['Validation'])
     plt.pause(0.00001)
+
+    # Uncomment if I want to see the training loss/accuracy as well
+
+    # stats.append([val_acc, val_loss, train_acc, train_loss])
+    # print('Epoch {}'.format(epoch))
+    # print('\tValidation Loss: {}'.format(val_loss))
+    # print('\tValidation Accuracy: {}'.format(val_acc))
+    # print('\tTrain Loss: {}'.format(train_loss))
+    # print('\tTrain Accuracy: {}'.format(train_acc))
+
+    # valid_acc = [s[0] for s in stats]
+    # valid_loss = [s[1] for s in stats]
+    # train_acc = [s[2] for s in stats]
+    # train_loss = [s[3] for s in stats]
+    # axes[0].plot(range(epoch - len(stats) + 1, epoch + 1), valid_acc,
+    #     linestyle='--', marker='o', color='b')
+    # axes[0].plot(range(epoch - len(stats) + 1, epoch + 1), train_acc,
+    #     linestyle='--', marker='o', color='r')
+    # axes[0].legend(['Validation', 'Train'])
+    # axes[1].plot(range(epoch - len(stats) + 1, epoch + 1), valid_loss,
+    #     linestyle='--', marker='o', color='b')
+    # axes[1].plot(range(epoch - len(stats) + 1, epoch + 1), train_loss,
+    #     linestyle='--', marker='o', color='r')
+    # axes[1].legend(['Validation', 'Train'])
+    # plt.pause(0.00001)
 
 
 
@@ -116,13 +135,13 @@ class NNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         # input: 54275 output: 10000
-        self.fc1 = nn.Linear(26196, 1000)
+        self.fc1 = nn.Linear(88, 44)
         self.drop1 = nn.Dropout(0.4)
         # input: 10000 output: 1024
-        self.fc2 = nn.Linear(1000, 100)
+        self.fc2 = nn.Linear(44, 22)
         self.drop2 = nn.Dropout(0.4)
         # input: 64 output: 11
-        self.fc3 = nn.Linear(100, 11)
+        self.fc3 = nn.Linear(22, 11)
         #
 
         self.init_weights()
@@ -155,23 +174,6 @@ class NNetwork(nn.Module):
 
 
 def main():
-    # DELETE. JUST FOR FAKE EXAMPLE DATA
-    #_______________________________________________________________________________________________________________________
-    # amazon = pd.read_csv('sentiment labelled sentences/amazon_cells_labelled.txt', delimiter = "\t", quoting=3, header=None)
-    # amazon.columns = ['text', 'label']
-    # transcript_features = process_transcripts(amazon.text, amazon.text)
-
-    # categories = np.random.randint(11, size=transcript_features.shape[0]) 
-
-    # df = pd.DataFrame({'categories': categories, 'transcript_features': list(transcript_features)}, columns=['categories', 'transcript_features'])
-    # print(df.head())
-
-    # train, test = train_test_split(df, test_size=0.2)
-    # train = train.reset_index(drop=True)
-    # test = test.reset_index(drop=True)
-    #_______________________________________________________________________________________________________________________
-    # DELETE ALL ABOVE
-
 
     
     test_file_location = "./data/test_dataframe.pkl"
@@ -180,31 +182,31 @@ def main():
 
   
 
-    test = pd.read_pickle(test_file_location)
     train = pd.read_pickle(train_file_location)
+    test = pd.read_pickle(test_file_location)
     validate = pd.read_pickle(validate_file_location)
 
-    # change indexes so right after train the tests indexes start, and right after the test indexes the validate indexes start
-    test.index = np.arange(train.shape[0], train.shape[0] + test.shape[0])
-    validate.index = np.arange(train.shape[0] + test.shape[0], train.shape[0] + test.shape[0] + validate.shape[0])
+    # change indexes so right after train the validate indexes start, and right after the validate indexes the test indexes start
+    validate.index = np.arange(train.shape[0], train.shape[0] + validate.shape[0])
+    test.index = np.arange(train.shape[0] + validate.shape[0], train.shape[0] + validate.shape[0] + test.shape[0])
 
-    # stack train, test, and validate on top one another in that exact order
-    df = pd.concat([train, test, validate])
-    # df = pd.concat([train, test])
+    # stack train, validate, and test on top one another in that exact order
+    df = pd.concat([train, validate, test])
     
 
-    max_epochs = 30
+    max_epochs = 40
     partition = {}
     labels = {}
     partition['train'] = train.index
+    partition['validate'] = validate.index
     partition['test'] = test.index
 
     for index in train.index:
         labels[index] = int(train[train.index == index]['categories'])
+    for index in validate.index:
+        labels[index] = int(validate[validate.index == index]['categories'])
     for index in test.index:
         labels[index] = int(test[test.index == index]['categories'])
-    # for index in validate.index:
-    #     labels[index] = int(validate[validate.index == index]['categories'])
 
 
 
@@ -212,12 +214,11 @@ def main():
     training_set = Dataset(partition['train'], labels, df['transcript_features'])
     training_generator = torch.utils.data.DataLoader(training_set, batch_size=64, shuffle=True)
 
-    test_set = Dataset(partition['test'], labels, test['transcript_features'])
+    validate_set = Dataset(partition['validate'], labels, df['transcript_features'])
+    validate_generator = torch.utils.data.DataLoader(validate_set, batch_size=64, shuffle=True)
+
+    test_set = Dataset(partition['test'], labels, df['transcript_features'])
     test_generator = torch.utils.data.DataLoader(test_set, batch_size=64, shuffle=True)
-
-    # Loop over epochs
-
-
     
 
     # define model, loss function, and optimizer
@@ -235,7 +236,7 @@ def main():
 
     stats = []
     # Evaluate model
-    _evaluate_epoch(axes, training_generator, test_generator, model.eval(), criterion, 0, stats)
+    _evaluate_epoch(axes, training_generator, validate_generator, model.eval(), criterion, 0, stats)
 
 
     # Loop over the entire dataset multiple times
@@ -244,11 +245,35 @@ def main():
         _train_epoch(training_generator, model.train(), criterion, optimizer)
 
         # Evaluate model
-        _evaluate_epoch(axes, training_generator, test_generator, model.eval(), criterion, epoch+1,
+        _evaluate_epoch(axes, training_generator, validate_generator, model.eval(), criterion, epoch+1,
             stats)
 
 
     print('Finished Training')
+
+    # Calculate test accuracy and loss
+    model = model.eval()
+    with torch.no_grad():
+        y_true, y_pred = [], []
+        correct, total = 0, 0
+        running_loss = []
+        for X, y in test_generator:
+                output = model(X)
+                predicted = torch.argmax(torch.nn.functional.softmax(output.data, dim=1), dim=1)
+                y_true.append(y)
+                y_pred.append(predicted)
+                total += y.size(0)
+                correct += (predicted == y).sum().item()
+                running_loss.append(criterion(output, y).item())
+        test_loss = np.mean(running_loss)
+        test_acc = correct / total
+    
+    print("Test loss:", test_loss)
+    print("Test accuracy:", test_acc)
+
+    # save stats as numpy array to csv file
+    stats = np.array(stats)
+    np.savetxt('stats_audio_features.csv', stats, delimiter=',')
 
     fig.savefig('_training_plot.png', dpi=200)
     plt.ioff()
