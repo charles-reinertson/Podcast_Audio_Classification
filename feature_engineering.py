@@ -10,27 +10,27 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     '--test_num_batches',
     type=int,
-    default=114,
+    default=115,
     help='The number of batches of test data')
 parser.add_argument(
     '--train1_num_batches',
     type=int,
-    default=139,
+    default=140,
     help='The number of batches of train 1 data')
 parser.add_argument(
     '--train2_num_batches',
     type=int,
-    default=154,
+    default=155,
     help='The number of batches of train 2 data')
 parser.add_argument(
     '--train3_num_batches',
     type=int,
-    default=141,
+    default=142,
     help='The number of batches of train 3 data')
 parser.add_argument(
     '--validate_num_batches',
     type=int,
-    default=120,
+    default=121,
     help='The number of batches of validate data')
 
 
@@ -213,10 +213,16 @@ def feature_engineer(args):
     test_labels = test.label
     validate_labels = validate.label
 
+
     # Change categories to be numerical
     train_labels = pd.factorize(train_labels, sort=True)[0]
     test_labels = pd.factorize(test_labels, sort=True)[0]
     validate_labels = pd.factorize(validate_labels, sort=True)[0]
+    
+    # There is one NaN label due to a tiny bug that only affects this one datapoint in the original data_prep.py. Delete this row of data
+    result = np.where(validate_labels == -1)
+    validate_labels = np.delete(validate_labels, result, axis=0)
+    
 
 
     # drop labels from main dataframe
@@ -232,27 +238,46 @@ def feature_engineer(args):
     # Normalize features in train, test, and validate (normalize speech features)
     test, train, validate = z_score(test, train, validate)
 
+    # just transcript features
+    train_transcript_features = pd.DataFrame(train_transcript_features)
+    test_transcript_features = pd.DataFrame(test_transcript_features)
+    validate_transcript_features = pd.DataFrame(validate_transcript_features)
 
     # combine transcript feauters and speech features
-    train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features)], axis=1)
-    test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features)], axis=1)
-    validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features)], axis=1)
+    # train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features)], axis=1)
+    # test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features)], axis=1)
+    # validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features)], axis=1)
     
     # combine transcript feauters and speech features and title features
     # train_transcript_features = pd.concat([train, pd.DataFrame(train_transcript_features), pd.DataFrame(train_title_features)], axis=1)
     # test_transcript_features = pd.concat([test, pd.DataFrame(test_transcript_features), pd.DataFrame(test_title_features)], axis=1)
     # validate_transcript_features = pd.concat([validate, pd.DataFrame(validate_transcript_features), pd.DataFrame(validate_title_features)], axis=1)
 
-    # DELETE
+    # just title features
     # train_transcript_features = pd.DataFrame(train_title_features)
     # test_transcript_features = pd.DataFrame(test_title_features)
     # validate_transcript_features = pd.DataFrame(validate_title_features)
+
+    # just audio feature
+    # train_transcript_features = train
+    # test_transcript_features = test
+    # validate_transcript_features = validate
+
   
 
     # fill nan values with zero
     train_transcript_features = train_transcript_features.fillna(0)
     test_transcript_features = test_transcript_features.fillna(0)
     validate_transcript_features = validate_transcript_features.fillna(0)
+    
+
+    # convert features to numpy from pandas
+    train_transcript_features = train_transcript_features.to_numpy()
+    test_transcript_features = test_transcript_features.to_numpy()
+    validate_transcript_features = validate_transcript_features.to_numpy()
+
+    # There is one NaN label due to a tiny bug that only affects this one datapoint in the original data_prep.py. Delete this row of data
+    validate_transcript_features = np.delete(validate_transcript_features, result, axis=0)
 
     # get the shape of the transcript features
     print("Train shape:")
@@ -261,12 +286,6 @@ def feature_engineer(args):
     print(test_transcript_features.shape)
     print("Validate shape:")
     print(validate_transcript_features.shape)
-    
-
-    # convert features to numpy from pandas
-    train_transcript_features = train_transcript_features.to_numpy()
-    test_transcript_features = test_transcript_features.to_numpy()
-    validate_transcript_features = validate_transcript_features.to_numpy()
 
     # create a final train, test, validate dataframe with all features correct and ready to be modeled
     train = pd.DataFrame({'categories': train_labels, 'transcript_features': list(train_transcript_features)}, columns=['categories', 'transcript_features'])
