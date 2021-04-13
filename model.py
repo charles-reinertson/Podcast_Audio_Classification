@@ -63,6 +63,8 @@ def _evaluate_epoch(axes, tr_loader, validate_loader, model, criterion, epoch, s
         val_loss = np.mean(running_loss)
         val_acc = correct / total
     
+    
+
     stats.append([val_acc, val_loss])
     print('Epoch {}'.format(epoch))
     print('\tValidation Loss: {}'.format(val_loss))
@@ -134,14 +136,14 @@ class Dataset(torch.utils.data.Dataset):
 class NNetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        # input: 54275 output: 10000
-        self.fc1 = nn.Linear(88, 44)
+        # input: 29404 output: 10000
+        self.fc1 = nn.Linear(15, 13)
         self.drop1 = nn.Dropout(0.4)
-        # input: 10000 output: 1024
-        self.fc2 = nn.Linear(44, 22)
+        # input: 10000 output: 1000
+        self.fc2 = nn.Linear(13, 12)
         self.drop2 = nn.Dropout(0.4)
-        # input: 64 output: 11
-        self.fc3 = nn.Linear(22, 11)
+        # input: 1000 output: 11
+        self.fc3 = nn.Linear(12, 11)
         #
 
         self.init_weights()
@@ -174,7 +176,6 @@ class NNetwork(nn.Module):
 
 
 def main():
-
     
     test_file_location = "./data/test_dataframe.pkl"
     train_file_location = "./data/train_dataframe.pkl"
@@ -251,7 +252,59 @@ def main():
 
     print('Finished Training')
 
-    # Calculate test accuracy and loss
+    # label numbers corresponding to the actual category names
+    # 0:'business',
+    # 1:'comedy',
+    # 2:'education',
+    # 3:'games',
+    # 4:'health',
+    # 5:'music',
+    # 6:'politics',
+    # 7:'society',
+    # 8:'spirituality',
+    # 9:'sports',
+    # 10:'technology',
+    
+    category_to_accuracy = {
+        'business':0,
+        'comedy':0,
+        'education':0,
+        'games':0,
+        'health':0,
+        'music':0,
+        'politics':0,
+        'society':0,
+        'spirituality':0,
+        'sports':0,
+        'technology':0,
+    }
+    # label numbers to count of correct labels as well as total labels
+    index_to_count = {
+        'correct0':0,
+        'total0':0,
+        'correct1':0,
+        'total1':0,
+        'correct2':0,
+        'total2':0,
+        'correct3':0,
+        'total3':0,
+        'correct4':0,
+        'total4':0,
+        'correct5':0,
+        'total5':0,
+        'correct6':0,
+        'total6':0,
+        'correct7':0,
+        'total7':0,
+        'correct8':0,
+        'total8':0,
+        'correct9':0,
+        'total9':0,
+        'correct10':0,
+        'total10':0,
+    }
+
+    # Calculate test accuracy and loss as well as accuracy for each category
     model = model.eval()
     with torch.no_grad():
         y_true, y_pred = [], []
@@ -265,18 +318,64 @@ def main():
                 total += y.size(0)
                 correct += (predicted == y).sum().item()
                 running_loss.append(criterion(output, y).item())
+                # predict accuracy per category
+                for i in range(0, 11):
+                    pred_actual = (predicted == y)
+                    pred_num = (y == i)
+                    holder = torch.where(pred_num == True, 1, 5)
+                    to_sum = (pred_actual == holder)
+          
+                    index_to_count[('correct' + str(i))] += (to_sum).sum().item()
+                    index_to_count[('total' + str(i))] += (y == i).sum().item()
+
         test_loss = np.mean(running_loss)
         test_acc = correct / total
+        category_to_accuracy['business'] = index_to_count['correct0'] / index_to_count['total0']
+        category_to_accuracy['comedy'] = index_to_count['correct1'] / index_to_count['total1']
+        category_to_accuracy['education'] = index_to_count['correct2'] / index_to_count['total2']
+        category_to_accuracy['games'] = index_to_count['correct3'] / index_to_count['total3']
+        category_to_accuracy['health'] = index_to_count['correct4'] / index_to_count['total4']
+        category_to_accuracy['music'] = index_to_count['correct5'] / index_to_count['total5']
+        category_to_accuracy['politics'] = index_to_count['correct6'] / index_to_count['total6']
+        category_to_accuracy['society'] = index_to_count['correct7'] / index_to_count['total7']
+        category_to_accuracy['spirituality'] = index_to_count['correct8'] / index_to_count['total8']
+        category_to_accuracy['sports'] = index_to_count['correct9'] / index_to_count['total9']
+        category_to_accuracy['technology'] = index_to_count['correct10'] / index_to_count['total10']
     
     print("Test loss: {0}".format(test_loss))
     print("Test accuracy: {0}".format(test_acc))
+    print("Test category business accuracy: {0}".format(category_to_accuracy['business']))
+    print("Test category comedy accuracy: {0}".format(category_to_accuracy['comedy']))
+    print("Test category education accuracy: {0}".format(category_to_accuracy['education']))
+    print("Test category games accuracy: {0}".format(category_to_accuracy['games']))
+    print("Test category health accuracy: {0}".format(category_to_accuracy['health']))
+    print("Test category music accuracy: {0}".format(category_to_accuracy['music']))
+    print("Test category politics accuracy: {0}".format(category_to_accuracy['politics']))
+    print("Test category society accuracy: {0}".format(category_to_accuracy['society']))
+    print("Test category spirituality accuracy: {0}".format(category_to_accuracy['spirituality']))
+    print("Test category sports accuracy: {0}".format(category_to_accuracy['sports']))
+    print("Test category technology accuracy: {0}".format(category_to_accuracy['technology']))
+
+
     with open("test_emotion_features.txt", "w+") as text_file:
         text_file.write("Test loss: {0} \n".format(test_loss))
-        text_file.write("Test accuracy: {0}".format(test_acc))
+        text_file.write("Test accuracy: {0} \n".format(test_acc))
+        text_file.write("Test category business accuracy: {0} \n".format(category_to_accuracy['business']))
+        text_file.write("Test category comedy accuracy: {0} \n".format(category_to_accuracy['comedy']))
+        text_file.write("Test category education accuracy: {0} \n".format(category_to_accuracy['education']))
+        text_file.write("Test category games accuracy: {0} \n".format(category_to_accuracy['games']))
+        text_file.write("Test category health accuracy: {0} \n".format(category_to_accuracy['health']))
+        text_file.write("Test category music accuracy: {0} \n".format(category_to_accuracy['music']))
+        text_file.write("Test category politics accuracy: {0} \n".format(category_to_accuracy['politics']))
+        text_file.write("Test category society accuracy: {0} \n".format(category_to_accuracy['society']))
+        text_file.write("Test category spirituality accuracy: {0} \n".format(category_to_accuracy['spirituality']))
+        text_file.write("Test category sports accuracy: {0} \n".format(category_to_accuracy['sports']))
+        text_file.write("Test category technology accuracy: {0} \n".format(category_to_accuracy['technology']))
+
 
     # save stats as numpy array to csv file
     stats = np.array(stats)
-    np.savetxt('stats_audio_features.csv', stats, delimiter=',')
+    np.savetxt('stats_emotion_features.csv', stats, delimiter=',')
 
     fig.savefig('_training_plot.png', dpi=200)
     plt.ioff()
