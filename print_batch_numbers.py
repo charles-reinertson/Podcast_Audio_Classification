@@ -19,8 +19,8 @@ def get_batch_nums(directory):
     for partition in ['validate', 'test']:
         with open(f'{directory}/{partition}_startup.pkl', mode='rb') as file:
             _, batch_nums[partition] = pickle.load(file)
-    print(batch_nums)
+    return batch_nums
 
 
 if __name__ == '__main__':
-    get_batch_nums('./data')
+    print(get_batch_nums('./data'))
