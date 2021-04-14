@@ -1,0 +1,13 @@
+Test loss: 1.637868686553535 
+Test accuracy: 0.45962285878796605 
+Test category business accuracy: 0.6930379746835443 
+Test category comedy accuracy: 0.5290102389078498 
+Test category education accuracy: 0.3783783783783784 
+Test category games accuracy: 0.5507936507936508 
+Test category health accuracy: 0.5707236842105263 
+Test category music accuracy: 0.44015444015444016 
+Test category politics accuracy: 0.18172157279489903 
+Test category society accuracy: 0.10766045548654245 
+Test category spirituality accuracy: 0.8333333333333334 
+Test category sports accuracy: 0.6583011583011583 
+Test category technology accuracy: 0.26424870466321243 

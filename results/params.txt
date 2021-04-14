@@ -1,22 +1,40 @@
-Base Model:
+Base model:
 	Optimizer:  Adam
 	Loss:  Cross Entropy
-	Epochs:  40
+	Epochs:  41
 	Learning Rate:  0.0001
 	Batch Size:  64
 	Network:
-		FC1:  29705 --> 10000
+		FC1:  29404 --> 10000
 		Dropout:  0.4
 		Activation: SiLU
-		FC2:  10000 --> 64
+		FC2:  10000 --> 1000
 		Dropout:  0.4
 		Activation: SiLU
-		FC3:  64 --> 11
+		FC3:  1000 --> 11
 
-DistilBERT Encoded Transcripts (distilbert):
-	Epochs:  15
+Bag of words encoded transcripts (bag_of_words):
+	Validation Accuracy:  ? %
+
+DistilBERT encoded Transcripts (distilbert):
+	Epochs:  16
 	Network:
 		FC1: 768 --> 256
 		FC2: 256 --> 64
 		FC3: 64 --> 11
 	Validation Accuracy:  50.6 %
+
+BERT encoded Transcripts (bert):
+	Epochs:  16
+	Network:
+		FC1: 768 --> 256
+		FC2: 256 --> 64
+		FC3: 64 --> 11
+	Validation Accuracy:  50.1 %
+
+BERT encoded Transcripts with pooling layer (bert_pooled):
+	Network:
+		FC1: 768 --> 256
+		FC2: 256 --> 64
+		FC3: 64 --> 11
+	Validation Accuracy:  46.7 %
