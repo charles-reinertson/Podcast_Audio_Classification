@@ -14,8 +14,8 @@ Base model:
 		FC3:  1000 --> 11
 
 Bag of words encoded transcripts (bag_of_words):
-	Epochs: 16
-	Validation Accuracy:  46.0 %
+	Epochs: 9
+	Validation Accuracy:   46%
 
 DistilBERT encoded Transcripts (distilbert):
 	Epochs:  16
@@ -39,3 +39,18 @@ BERT encoded Transcripts with pooling layer (bert_pooled):
 		FC2: 256 --> 64
 		FC3: 64 --> 11
 	Validation Accuracy:  43.7 %
+	
+Emotion NRCLex features (emotion):
+	Epochs: 40
+	Network:
+		FC1: 15 --> 13
+		FC2: 13 --> 11
+	Validation Accuracy:  14.2 %
+	
+Audio features (audio):
+	Epochs: 40
+	Network:
+		FC1: 88 --> 44
+		FC2: 44 --> 22
+		FC3: 22 --> 11
+	Validation Accuracy:  11.2 %
