@@ -16,8 +16,9 @@ def main():
 
     epoch = 40
     epoch1 = 9
-    epoch2 = 41
-    epoch3 = 16
+    epoch2 = 40
+    epoch3 = 15
+    epoch4 = 15
 
 
     stats_audio_features = np.loadtxt('results/stats_audio_features.csv', delimiter=',')
@@ -62,13 +63,13 @@ def main():
     axes[0].plot(range(epoch2 - len(stats_test_bert_pooled_features) + 1, epoch2 + 1), valid_acc3,
         linestyle='--', marker='o', color='c')
 
-    axes[0].plot(range(epoch3 - len(stats_test_bert_features) + 1, epoch3 + 1), valid_acc4,
+    axes[0].plot(range(epoch4 - len(stats_test_bert_features) + 1, epoch4 + 1), valid_acc4,
         linestyle='--', marker='o', color='m')
 
     axes[0].plot(range(epoch3 - len(stats_test_distilbert_features) + 1, epoch3 + 1), valid_acc5,
         linestyle='--', marker='o', color='y')
     
-    axes[0].plot(range(epoch3 - len(stats_test_bag_and_bert_features) + 1, epoch3 + 1), valid_acc6,
+    axes[0].plot(range(epoch4 - len(stats_test_bag_and_bert_features) + 1, epoch4 + 1), valid_acc6,
         linestyle='--', marker='o', color='k')
 
     axes[0].legend(['Audio Features', 'Emotion Features', 'Bag of Words', 'Bert Pooled', 'Bert', 'Distilbert', 'Bag of Words + Bert'])
@@ -85,13 +86,13 @@ def main():
     axes[1].plot(range(epoch2 - len(stats_test_bert_pooled_features) + 1, epoch2 + 1), valid_loss3,
         linestyle='--', marker='o', color='c')
 
-    axes[1].plot(range(epoch3 - len(stats_test_bert_features) + 1, epoch3 + 1), valid_loss4,
+    axes[1].plot(range(epoch4 - len(stats_test_bert_features) + 1, epoch4 + 1), valid_loss4,
         linestyle='--', marker='o', color='m')
 
     axes[1].plot(range(epoch3 - len(stats_test_distilbert_features) + 1, epoch3 + 1), valid_loss5,
         linestyle='--', marker='o', color='y')
     
-    axes[1].plot(range(epoch3 - len(stats_test_bag_and_bert_features) + 1, epoch3 + 1), valid_loss6,
+    axes[1].plot(range(epoch4 - len(stats_test_bag_and_bert_features) + 1, epoch4 + 1), valid_loss6,
         linestyle='--', marker='o', color='k')
 
     axes[1].legend(['Audio Features', 'Emotion Features', 'Bag of Words', 'Bert Pooled', 'Bert', 'Distilbert', 'Bag of Words + Bert'])
