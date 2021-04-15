@@ -1,13 +1,13 @@
-Test loss: 2.081993352382555 
-Test accuracy: 0.4013243126529437 
-Test category business recall: 0.4778481012658228 
-Test category comedy recall: 0.3924914675767918 
-Test category education recall: 0.26238738738738737 
-Test category games recall: 0.4650793650793651 
-Test category health recall: 0.39144736842105265 
-Test category music recall: 0.39575289575289574 
-Test category politics recall: 0.28055260361317746 
-Test category society recall: 0.23809523809523808 
-Test category spirituality recall: 0.6968085106382979 
-Test category sports recall: 0.5733590733590733 
-Test category technology recall: 0.3765112262521589 
+Test loss: 1.847759940208645 
+Test accuracy: 0.42118900244709945 
+Test category business recall: 0.5506329113924051 
+Test category comedy recall: 0.3720136518771331 
+Test category education recall: 0.23536036036036037 
+Test category games recall: 0.4396825396825397 
+Test category health recall: 0.5592105263157895 
+Test category music recall: 0.4555984555984556 
+Test category politics recall: 0.2858660998937301 
+Test category society recall: 0.13250517598343686 
+Test category spirituality recall: 0.725177304964539 
+Test category sports recall: 0.6911196911196911 
+Test category technology recall: 0.34196891191709844 
