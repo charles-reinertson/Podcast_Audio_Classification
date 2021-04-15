@@ -45,6 +45,7 @@ Emotion NRCLex features (emotion):
 	Network:
 		FC1: 15 --> 13
 		FC2: 13 --> 11
+		FC3: None
 	Validation Accuracy:  14.2 %
 	
 Audio features (audio):
@@ -54,3 +55,9 @@ Audio features (audio):
 		FC2: 44 --> 22
 		FC3: 22 --> 11
 	Validation Accuracy:  11.2 %
+
+Bag of words and BERT encoded transcripts (bag+bert):
+	Epochs: 16
+	Network:
+		FC1 30172 --> 10000
+	Validation Accuracy:  49.5 %

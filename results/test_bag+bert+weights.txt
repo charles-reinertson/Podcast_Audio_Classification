@@ -1,0 +1,13 @@
+Test loss: 1.698275865764793 
+Test accuracy: 0.4698430977400317 
+Test category business recall: 0.564873417721519 
+Test category comedy recall: 0.4658703071672355 
+Test category education recall: 0.25675675675675674 
+Test category games recall: 0.4888888888888889 
+Test category health recall: 0.5361842105263158 
+Test category music recall: 0.5405405405405406 
+Test category politics recall: 0.4303931987247609 
+Test category society recall: 0.18840579710144928 
+Test category spirituality recall: 0.7890070921985816 
+Test category sports recall: 0.7760617760617761 
+Test category technology recall: 0.25734024179620035 
