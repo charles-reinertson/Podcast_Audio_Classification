@@ -137,13 +137,13 @@ class NNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         # input: 29404 output: 10000
-        self.fc1 = nn.Linear(15, 13)
+        self.fc1 = nn.Linear(29404, 10000)
         self.drop1 = nn.Dropout(0.4)
         # input: 10000 output: 1000
-        self.fc2 = nn.Linear(13, 12)
+        self.fc2 = nn.Linear(10000, 1000)
         self.drop2 = nn.Dropout(0.4)
         # input: 1000 output: 11
-        self.fc3 = nn.Linear(12, 11)
+        self.fc3 = nn.Linear(1000, 11)
         #
 
         self.init_weights()
@@ -195,7 +195,7 @@ def main():
     df = pd.concat([train, validate, test])
     
 
-    max_epochs = 40
+    max_epochs = 9
     partition = {}
     labels = {}
     partition['train'] = train.index
@@ -224,7 +224,24 @@ def main():
 
     # define model, loss function, and optimizer
     model = NNetwork()
-    criterion = torch.nn.CrossEntropyLoss()
+    # label numbers corresponding to the actual count in train 
+    # 0: 2375,
+    # 1: 2336,
+    # 2: 2920,
+    # 3: 2386,
+    # 4: 2310,
+    # 5: 1704,
+    # 6: 2181,
+    # 7: 2106,
+    # 8: 4956,
+    # 9: 1788,
+    # 10: 2343,
+    weights = torch.tensor([2375, 2336, 2920, 2386, 2310, 1704, 2181, 2106, 4956, 1788, 2343], dtype=torch.float32)
+    weights = weights / weights.sum()
+    weights = 1.0 / weights
+    weights = weights / weights.sum()
+
+    criterion = torch.nn.CrossEntropyLoss(weight=weights)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
     plt.ion()
@@ -343,39 +360,39 @@ def main():
         category_to_accuracy['technology'] = index_to_count['correct10'] / index_to_count['total10']
     
     print("Test loss: {0}".format(test_loss))
-    print("Test accuracy: {0}".format(test_acc))
-    print("Test category business accuracy: {0}".format(category_to_accuracy['business']))
-    print("Test category comedy accuracy: {0}".format(category_to_accuracy['comedy']))
-    print("Test category education accuracy: {0}".format(category_to_accuracy['education']))
-    print("Test category games accuracy: {0}".format(category_to_accuracy['games']))
-    print("Test category health accuracy: {0}".format(category_to_accuracy['health']))
-    print("Test category music accuracy: {0}".format(category_to_accuracy['music']))
-    print("Test category politics accuracy: {0}".format(category_to_accuracy['politics']))
-    print("Test category society accuracy: {0}".format(category_to_accuracy['society']))
-    print("Test category spirituality accuracy: {0}".format(category_to_accuracy['spirituality']))
-    print("Test category sports accuracy: {0}".format(category_to_accuracy['sports']))
-    print("Test category technology accuracy: {0}".format(category_to_accuracy['technology']))
+    print("Test recall: {0}".format(test_acc))
+    print("Test category business recall: {0}".format(category_to_accuracy['business']))
+    print("Test category comedy recall: {0}".format(category_to_accuracy['comedy']))
+    print("Test category education recall: {0}".format(category_to_accuracy['education']))
+    print("Test category games recall: {0}".format(category_to_accuracy['games']))
+    print("Test category health recall: {0}".format(category_to_accuracy['health']))
+    print("Test category music recall: {0}".format(category_to_accuracy['music']))
+    print("Test category politics recall: {0}".format(category_to_accuracy['politics']))
+    print("Test category society recall: {0}".format(category_to_accuracy['society']))
+    print("Test category spirituality recall: {0}".format(category_to_accuracy['spirituality']))
+    print("Test category sports recall: {0}".format(category_to_accuracy['sports']))
+    print("Test category technology recall: {0}".format(category_to_accuracy['technology']))
 
 
-    with open("test_emotion_features.txt", "w+") as text_file:
+    with open("test_bag_of_words_features.txt", "w+") as text_file:
         text_file.write("Test loss: {0} \n".format(test_loss))
         text_file.write("Test accuracy: {0} \n".format(test_acc))
-        text_file.write("Test category business accuracy: {0} \n".format(category_to_accuracy['business']))
-        text_file.write("Test category comedy accuracy: {0} \n".format(category_to_accuracy['comedy']))
-        text_file.write("Test category education accuracy: {0} \n".format(category_to_accuracy['education']))
-        text_file.write("Test category games accuracy: {0} \n".format(category_to_accuracy['games']))
-        text_file.write("Test category health accuracy: {0} \n".format(category_to_accuracy['health']))
-        text_file.write("Test category music accuracy: {0} \n".format(category_to_accuracy['music']))
-        text_file.write("Test category politics accuracy: {0} \n".format(category_to_accuracy['politics']))
-        text_file.write("Test category society accuracy: {0} \n".format(category_to_accuracy['society']))
-        text_file.write("Test category spirituality accuracy: {0} \n".format(category_to_accuracy['spirituality']))
-        text_file.write("Test category sports accuracy: {0} \n".format(category_to_accuracy['sports']))
-        text_file.write("Test category technology accuracy: {0} \n".format(category_to_accuracy['technology']))
+        text_file.write("Test category business recall: {0} \n".format(category_to_accuracy['business']))
+        text_file.write("Test category comedy recall: {0} \n".format(category_to_accuracy['comedy']))
+        text_file.write("Test category education recall: {0} \n".format(category_to_accuracy['education']))
+        text_file.write("Test category games recall: {0} \n".format(category_to_accuracy['games']))
+        text_file.write("Test category health recall: {0} \n".format(category_to_accuracy['health']))
+        text_file.write("Test category music recall: {0} \n".format(category_to_accuracy['music']))
+        text_file.write("Test category politics recall: {0} \n".format(category_to_accuracy['politics']))
+        text_file.write("Test category society recall: {0} \n".format(category_to_accuracy['society']))
+        text_file.write("Test category spirituality recall: {0} \n".format(category_to_accuracy['spirituality']))
+        text_file.write("Test category sports recall: {0} \n".format(category_to_accuracy['sports']))
+        text_file.write("Test category technology recall: {0} \n".format(category_to_accuracy['technology']))
 
 
     # save stats as numpy array to csv file
     stats = np.array(stats)
-    np.savetxt('stats_emotion_features.csv', stats, delimiter=',')
+    np.savetxt('stats_bag_of_words_features.csv', stats, delimiter=',')
 
     fig.savefig('_training_plot.png', dpi=200)
     plt.ioff()
